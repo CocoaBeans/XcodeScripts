@@ -1,0 +1,7 @@
+##################################################
+## Attribute for diff'ing UTF-8 .strings files
+*.strings -crlf set diff
+
+##################################################
+## Attribute to for easy merging of Xcode project files
+*.pbxproj merge=union
