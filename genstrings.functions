@@ -4,7 +4,7 @@
 ###
 ###		genstrings.functions
 ###
-###		Scripts to generate .strings files from NSLocalizedString...() macros
+###		Bash functions to generate .strings files from NSLocalizedString...() macros
 ###		Includes function to convert strings to UTF-8 to remove Xcode warnings
 ###		
 ###		Copyright (c) 2013 Kevin Ross. All rights reserved.
