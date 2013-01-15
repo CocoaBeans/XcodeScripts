@@ -1,0 +1,61 @@
+#!/bin/bash
+
+############################################################################################################################
+###
+###		genstrings.functions
+###
+###		Scripts to generate .strings files from NSLocalizedString...() macros
+###		Includes function to convert strings to UTF-8 to remove Xcode warnings
+###		
+###		Copyright (c) 2013 Kevin Ross. All rights reserved.
+###
+###		Mutator:		Mutated:		Mutation:
+###		--------		--------		---------
+###		Kross			01.13.13		Initial Version
+###
+############################################################################################################################
+
+
+GenerateProjectStrings()
+{
+	PROJECT_PATH="${PROJECT_DIR}/${PROJECT}"
+	GenerateStringsForPath "${PROJECT_PATH}"
+}
+
+
+GenerateStringsForPath()
+{
+	GENSTRINGS_TARGET_PATH="${1}"
+	find "${GENSTRINGS_TARGET_PATH}" -name "*.m" \
+	-exec genstrings -o "${GENSTRINGS_TARGET_PATH}/en.lproj" {} +
+
+	ConvertStringsToUTF8 "${GENSTRINGS_TARGET_PATH}"
+}
+
+ConvertStringsToUTF8()
+{
+	FOLDER_TO_SEARCH=`echo "${1}"`
+
+	# We want to make sure our .strings files are UTF8 to remove the build warnings so we'll loop through all of the ".strings" files
+	for f in `find "${FOLDER_TO_SEARCH}" -name "*.strings" | sed 's/\ //g'`; do
+		echo "Converting to UTF-8: $f"
+
+		# Find the file encoding for the file to be converted
+		FILE_ENCODING=`file -b --mime-encoding "$f"`
+
+		if [[ $FILE_ENCODING == ERROR* ]]; then
+			FILE_ENCODING=`awk -F "\)" '{print $2}'`
+		fi
+
+# Convert the file to UTF8
+		iconv -f "$FILE_ENCODING" -t "UTF-8" "$f" > "$f.utf8"
+
+# If the convert command failed then we'll exit with an error to stop the build and fix the problem
+		if [[ "$?" -ne 0 ]]; then
+			exit 1
+		fi
+
+# Move replace the original file with the converted UTF8 file 
+		mv -f "$f.utf8" "$f"
+	done
+}
